@@ -32,7 +32,7 @@ Crucible targets versions of Python and Ansible that ship with RHEL. At the mome
 
 - 4.6
 - 4.7
-- 4.8
+- 4.8 (4.8.14)
 
 
 ## Assisted Installer versions Tested
