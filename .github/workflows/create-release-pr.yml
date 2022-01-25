@@ -1,0 +1,122 @@
+name: Create release PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_increment_type:
+        description: 'Version increment type'
+        required: false
+        default: 'auto'
+      release_head_branch:
+        description: 'Release head branch'
+        required: false
+        default: 'dev'
+
+env:
+  VERSION_FILE: version.txt
+  VERSION_INCREMENT_TYPE: ${{ github.event.inputs.version_increment_type }}
+  RELEASE_HEAD_BRANCH: ${{ github.event.inputs.release_head_branch }}
+
+jobs:
+  get-versions:
+    name: Get current and incremented versions
+    runs-on: ubuntu-20.04
+
+    outputs:
+      current_version: ${{ steps.cat_current_version_file.outputs.file_contents }}
+      incremented_version: ${{ steps.cat_new_version_file.outputs.file_contents }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ env.RELEASE_HEAD_BRANCH }}
+
+      - name: Install packages
+        run: pip install --upgrade bump2version
+
+      - name: Get current version
+        run: echo "::set-output name=file_contents::$(cat ${VERSION_FILE})"
+        id: cat_current_version_file
+
+      - name: Bump version
+        run: bump2version --current-version ${CURRENT_VERSION} ${VERSION_INCREMENT_TYPE} ${VERSION_FILE}
+        env:
+          CURRENT_VERSION: ${{ steps.cat_current_version_file.outputs.file_contents }}
+
+      - name: Set new version
+        run: echo "::set-output name=file_contents::$(cat ${VERSION_FILE})"
+        id: cat_new_version_file
+
+  create-pr-for-release:
+    name: Create PR for a new release
+    runs-on: ubuntu-20.04
+    needs: get-versions
+
+    env:
+      CURRENT_VERSION: ${{ needs.get-versions.outputs.current_version }}
+      INCREMENTED_VERSION: ${{ needs.get-versions.outputs.incremented_version }}
+
+    steps:
+      - name: Generate release notes
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const result = await github.rest.repos.generateReleaseNotes({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: '${{ env.INCREMENTED_VERSION }}',
+              target_commitish: '${{ env.RELEASE_HEAD_BRANCH }}',
+            });
+            console.log(result)
+
+            core.exportVariable('GENERATED_RELEASE_NOTES', result.data.body);
+
+      - name: Create a Pull Request
+        uses: actions/github-script@v5
+        env:
+          PULL_REQUEST_BODY: ${{ env.GENERATED_RELEASE_NOTES }}
+        with:
+          script: |
+            const { PULL_REQUEST_BODY } = process.env
+
+            github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: '${{ env.RELEASE_HEAD_BRANCH }}',
+              base: 'main',
+              title: 'Release ${{ env.INCREMENTED_VERSION }}',
+              body: `${PULL_REQUEST_BODY}`,
+              maintainer_can_modify: true,
+            })
+
+  update-pr-with-new-version-file:
+    name: Update PR with new version file
+    runs-on: ubuntu-20.04
+    needs:
+      - get-versions
+      - create-pr-for-release
+
+    env:
+      CURRENT_VERSION: ${{ needs.get-versions.outputs.current_version }}
+      INCREMENTED_VERSION: ${{ needs.get-versions.outputs.incremented_version }}
+      GIT_USER_NAME: github-actions[bot]
+      GIT_USER_EMAIL: github-actions[bot]@users.noreply.github.com
+      GIT_REMOTE: origin
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ env.RELEASE_HEAD_BRANCH }}
+
+      - name: Save new version file
+        run: echo ${INCREMENTED_VERSION} > ${VERSION_FILE}
+
+      - name: Commit changes
+        run: |
+          git config user.name "${GIT_USER_NAME}"
+          git config user.email "${GIT_USER_EMAIL}"
+
+          git add ${VERSION_FILE}
+          git commit -m "Bump version to ${INCREMENTED_VERSION}"
+
+          git push ${GIT_REMOTE} ${{ env.RELEASE_HEAD_BRANCH }}

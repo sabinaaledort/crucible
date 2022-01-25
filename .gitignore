@@ -2,6 +2,7 @@
 *.txt
 *.pub
 !requirements.txt
+!version.txt
 __stuff/**
 .history/
 .vscode

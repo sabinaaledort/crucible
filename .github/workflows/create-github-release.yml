@@ -1,0 +1,45 @@
+name: Create GitHub release after PR merge
+
+on:
+  # https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+env:
+  VERSION_FILE: version.txt
+
+jobs:
+  create-github-release:
+    name: Create a new GitHub release
+    runs-on: ubuntu-20.04
+    if: github.event.pull_request.merged == true
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: main
+
+      - name: Get current version
+        run: echo "::set-output name=file_contents::$(cat ${VERSION_FILE})"
+        id: cat_current_version_file
+
+      - name: Create GitHub release
+        uses: actions/github-script@v5
+        env:
+          CURRENT_VERSION: ${{ steps.cat_current_version_file.outputs.file_contents }}
+          RELEASE_BODY: ${{ github.event.pull_request.body }}
+        with:
+          script: |
+            const { RELEASE_BODY } = process.env
+
+            github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: '${{ env.CURRENT_VERSION }}',
+              target_commitish: 'main',
+              name: '${{ env.CURRENT_VERSION }}',
+              body: `${RELEASE_BODY}`,
+            })

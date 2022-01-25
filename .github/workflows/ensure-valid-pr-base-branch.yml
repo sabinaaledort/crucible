@@ -1,0 +1,49 @@
+name: Ensure valid PR base branch
+
+on:
+  # https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+    branches:
+      - main
+
+jobs:
+  ensure-base-branch-is-dev:
+    # Ensure all PRs are opened against the dev base branch, unless
+    # the PR is synchronizing main with dev (a release from dev)
+    if: ${{ github.base_ref == 'main' && github.head_ref != 'dev' }}
+    name: Ensure base branch is `dev`
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Submit a PR comment
+        uses: actions/github-script@v5
+        env:
+          COMMENT_BODY: |
+            Thank you for your contribution!
+            New PRs should use `dev` as the base branch.
+
+            The base branch will be automatically changed for you.
+        with:
+          script: |
+            const { COMMENT_BODY } = process.env
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `${COMMENT_BODY}`
+            })
+
+      - name: "Change PR's base branch to `dev`"
+        uses: actions/github-script@v5
+        with:
+          script: |
+            github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              base: 'dev',
+            })

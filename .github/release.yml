@@ -1,0 +1,17 @@
+changelog:
+  exclude:
+    authors:
+      - github-actions
+
+  categories:
+    - title: Features
+      labels:
+        - enhancement
+
+    - title: Breaking Changes
+      labels:
+        - breaking-change
+
+    - title: Other Changes
+      labels:
+        - "*"
