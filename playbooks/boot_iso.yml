@@ -7,4 +7,4 @@
   roles:
     - boot_iso
   vars:
-    - boot_iso_url: "{{ discovery_iso_server }}/{{ discovery_iso_name }}"
+    - boot_iso_url: "{{ discovery_iso_server_url }}/{{ discovery_iso_name }}"
