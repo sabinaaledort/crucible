@@ -1,0 +1,20 @@
+changelog:
+  exclude:
+    authors:
+      - github-actions
+    labels:
+      - release-notes/skip
+
+  categories:
+    - title: New Features
+      labels:
+        - enhancement
+
+    - title: Breaking Changes
+      labels:
+        - breaking-changes/inventory
+        - breaking-changes/output
+
+    - title: Fixes and Other Changes
+      labels:
+        - "*"

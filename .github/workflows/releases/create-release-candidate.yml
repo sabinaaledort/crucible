@@ -1,0 +1,65 @@
+name: Create Release Candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Source Branch/Tag/SHA'
+        required: true
+        default: 'main'
+
+      target_version:
+        description: 'Target Version [syntax: v3.2.1]'
+        required: true
+        default: 'auto'
+
+      previous_version:
+        description: 'Previous Version'
+        required: true
+        default: 'auto'
+
+jobs:
+  process-inputs:
+    name: Create Release Candidate
+    runs-on: ubuntu-20.04
+    working-directory: .github/workflows/releases
+
+    env:
+      DEFAULT_VERSION: v1.0.0
+      PROJECT_ROOT_DIR: ../../../
+      RELEASE_CONFIG: ../../release.yml
+
+    outputs:
+      target_version: ${{ steps.process_versions.outputs.target_version }}
+      previous_version: ${{ steps.process_versions.outputs.previous_version }}
+      release_notes: ${{ steps.process_release_notes.outputs.release_notes }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Python dependencies
+        run: pip3 install -r requirements.txt
+
+      - name: Expose TARGET_VERSION and PREVIOUS_VERSION to the job
+        run: |
+          VERSIONS=$(python3 scripts/get_versions.py \
+            --config ${{ env.RELEASE_CONFIG }} \
+            --target-version ${{ inputs.target_version }} \
+            --previous-version ${{ inputs.previous_version }} \
+            --default-version ${{ env.DEFAULT_VERSION }} \
+            --source-branch ${{ inputs.source_branch }})
+
+          ::set-output name=target_version::$(echo ${VERSIONS} | jq .target_version)
+          ::set-output name=previous_version::$(echo ${VERSIONS} | jq .previous_version)
+        id: process_versions
+
+      - name: Generate Release Notes
+        run: |
+          RELEASE_NOTES=$(python3 scripts/generate_release_notes.py \
+            --source-branch ${{ inputs.source_branch }} \
+            --root-directory ${{ env.PROJECT_ROOT_DIR }} \
+            --target-version ${{ env.TARGET_VERSION }} \
+            --previous-version ${{ env.PREVIOUS_VERSION }})
+
+          ::set-output name=release_notes::${RELEASE_NOTES}
+        id: process_release_notes
