@@ -115,7 +115,7 @@ jobs:
           ISSUE_TITLE: >-
             Release Candidate: ${{ env.RELEASE_CANDIDATE_TARGET_VERSION }}
             from ${{ env.RELEASE_CANDIDATE_SOURCE_BRANCH }}@${{ env.RELEASE_CANDIDATE_SOURCE_SHORT_HASH }}
-          ISSUE_BODY: ${{ inputs.source_branch }}
+          ISSUE_BODY: ${{ inputs.release_notes }}
           ISSUE_COMMENT_BODY: >-
             ## Release Candidate Details
 
