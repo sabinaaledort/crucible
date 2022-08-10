@@ -112,12 +112,12 @@ jobs:
         env:
           ISSUE_TITLE: >-
             Release Candidate: ${{ env.RELEASE_CANDIDATE_TARGET_VERSION }}
-            from ${{ env.RELEASE_CANDIDATE_SOURCE_BRANCH }}@${{ env.RELEASE_CANDIDATE_SOURCE_SHORT_HASH }}
+            from ${{ env.RELEASE_CANDIDATE_SOURCE_BRANCH }} @ ${{ env.RELEASE_CANDIDATE_SOURCE_SHORT_HASH }}
           ISSUE_BODY: ${{ inputs.release_notes }}
           ISSUE_COMMENT_BODY: >-
             ## Release Candidate Details
 
-            **Commit SHA:** `${{ env.RELEASE_CANDIDATE_SOURCE_FULL_HASH }}`
+            **Source Branch Commit SHA:** ${{ env.RELEASE_CANDIDATE_SOURCE_FULL_HASH }}
 
             **Temporary Branch:** `${{ env.RELEASE_CANDIDATE_BRANCH }}`
 
