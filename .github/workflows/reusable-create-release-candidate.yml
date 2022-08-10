@@ -20,6 +20,7 @@ on:
         required: true
 
 env:
+  RELEASE_CANDIDATE_BRANCH: "release-candidate/${{ inputs.target_version }}"
   RELEASE_CANDIDATE_SOURCE_BRANCH: ${{ inputs.source_branch }}
   RELEASE_CANDIDATE_TARGET_VERSION: ${{ inputs.target_version }}
 
@@ -29,6 +30,7 @@ env:
   ISSUE_LABELS_RELEASE_CANDIDATE: release-candidate
   ISSUE_LABELS_RELEASE_CANDIDATE_APPROVED: release-candidate/approved
 
+  GIT_REPOSITORY_URL: "https://github.com/${{ github.repository }}"
   GIT_USER_NAME: github-actions[bot]
   GIT_USER_EMAIL: github-actions[bot]@users.noreply.github.com
   GIT_REMOTE: origin
@@ -37,10 +39,6 @@ jobs:
   create-release-candidate-branch:
     name: Create Release Candidate Branch
     runs-on: ubuntu-20.04
-
-    env:
-      RELEASE_CANDIDATE_BRANCH: "release-candidate/${{ inputs.target_version }}"
-      REPOSITORY_URL: "https://github.com/${{ github.repository }}"
 
     outputs:
       # created_release_candidate_branch: ${{ steps.create_release_candidate_branch.outputs.branch_name }}
@@ -56,7 +54,7 @@ jobs:
       # https://git-scm.com/docs/git-ls-remote.html
       # - name: Ensure that ${{ env.RELEASE_CANDIDATE_BRANCH }} does not already exist
       #   run: |
-      #     git ls-remote --exit-code "${REPOSITORY_URL}" "${RELEASE_CANDIDATE_BRANCH}"
+      #     git ls-remote --exit-code "${GIT_REPOSITORY_URL}" "${RELEASE_CANDIDATE_BRANCH}"
       #     [[ "$?" == "2" ]]
 
       - name: Get SHA of HEAD of the source branch
