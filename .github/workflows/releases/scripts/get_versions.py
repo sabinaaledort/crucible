@@ -202,15 +202,14 @@ def get_processed_versions(
     # Process the 'previous version' input setting.
 
     if previous_version == OPTION_SET_VERSION_AUTOMATICALLY:
-        github_api_response_body = get_github_repository_latest_release(
-            github_access_token=github_access_token
-        )
-
-        if 'tag_name' in github_api_response_body:
+        try:
+            github_api_response_body = get_github_repository_latest_release(
+                github_access_token=github_access_token
+            )
             previous_version_processed = github_api_response_body['tag_name']
-        else:
+        except Exception as e:
+            logger.error(e)
             previous_version_processed = ''
-            logger.error(f"The previous version could not be fetched from GitHub.")
     else:
         # The previous version was specified by the user.
         previous_version_processed = previous_version
