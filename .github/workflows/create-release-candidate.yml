@@ -72,7 +72,7 @@ jobs:
 
           echo -e "${RELEASE_NOTES}"
 
-          echo -e ::set-output name=release_notes::"${RELEASE_NOTES}"
+          echo "::set-output name=release_notes::${RELEASE_NOTES}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         working-directory: .github/workflows/releases
