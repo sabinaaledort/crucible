@@ -22,7 +22,6 @@ jobs:
   process-inputs:
     name: Create Release Candidate
     runs-on: ubuntu-20.04
-    working-directory: .github/workflows/releases
 
     env:
       DEFAULT_VERSION: v1.0.0
@@ -39,6 +38,7 @@ jobs:
 
       - name: Install Python dependencies
         run: pip3 install -r requirements.txt
+        working-directory: .github/workflows/releases
 
       - name: Expose TARGET_VERSION and PREVIOUS_VERSION to the job
         run: |
@@ -51,6 +51,7 @@ jobs:
 
           ::set-output name=target_version::$(echo ${VERSIONS} | jq .target_version)
           ::set-output name=previous_version::$(echo ${VERSIONS} | jq .previous_version)
+        working-directory: .github/workflows/releases
         id: process_versions
 
       - name: Generate Release Notes
@@ -62,6 +63,7 @@ jobs:
             --previous-version ${{ env.PREVIOUS_VERSION }})
 
           ::set-output name=release_notes::${RELEASE_NOTES}
+        working-directory: .github/workflows/releases
         id: process_release_notes
 
       - name: Display debug data
