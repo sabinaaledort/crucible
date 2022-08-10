@@ -82,7 +82,7 @@ jobs:
     needs:
       - process-inputs
 
-    uses: mkochanowski/crucible/.github/workflows/reusable/create-release-candidate.yml@main
+    uses: mkochanowski/crucible/.github/workflows/reusable-create-release-candidate.yml@main
     with:
       source_branch: ${{ inputs.source_branch }}
       target_version: ${{ needs.process-inputs.outputs.target_version }}
