@@ -71,7 +71,7 @@ def get_github_generated_release_notes(
         'Authorization': f"token {github_access_token}",
     }
 
-    if previous_version is not None:
+    if previous_version is not None and previous_version:
         payload['previous_tag_name'] = previous_version
 
     api_endpoint_url = f'https://api.github.com/repos/{REPOSITORY_OWNER}/{REPOSITORY_NAME}/releases/generate-notes'

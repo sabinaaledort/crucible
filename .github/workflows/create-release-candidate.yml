@@ -47,11 +47,11 @@ jobs:
       - name: Process Target and Previous versions
         run: |
           VERSIONS=$(python3 scripts/get_versions.py \
-            --config ${{ env.RELEASE_CONFIG }} \
-            --target-version ${{ inputs.target_version }} \
-            --previous-version ${{ inputs.previous_version }} \
-            --default-version ${{ env.DEFAULT_VERSION }} \
-            --source-branch ${{ inputs.source_branch }})
+            --config "${{ env.RELEASE_CONFIG }}" \
+            --target-version "${{ inputs.target_version }}" \
+            --previous-version "${{ inputs.previous_version }}" \
+            --default-version "${{ env.DEFAULT_VERSION }}" \
+            --source-branch "${{ inputs.source_branch }}")
 
           echo ${VERSIONS}
 
@@ -65,10 +65,10 @@ jobs:
       - name: Generate Release Notes
         run: |
           RELEASE_NOTES=$(python3 scripts/generate_release_notes.py \
-            --source-branch ${{ inputs.source_branch }} \
-            --root-directory ${{ env.PROJECT_ROOT_DIR }} \
-            --target-version ${{ steps.process_versions.outputs.target_version }} \
-            --previous-version ${{ steps.process_versions.outputs.previous_version }})
+            --source-branch "${{ inputs.source_branch }}" \
+            --root-directory "${{ env.PROJECT_ROOT_DIR }}" \
+            --target-version "${{ steps.process_versions.outputs.target_version }}" \
+            --previous-version "${{ steps.process_versions.outputs.previous_version }}")
 
           echo -e "${RELEASE_NOTES}"
 
