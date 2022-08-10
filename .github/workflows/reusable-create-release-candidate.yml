@@ -132,7 +132,7 @@ jobs:
             - **To approve this Release Candidate:** Please add the `${{ env.ISSUE_LABELS_RELEASE_CANDIDATE_APPROVED }}`
             label to this issue. Perform this step once the Release Candidate has been tested and verified.
 
-            - **To dismiss this Release Candidate:** Please close the issue. This will remove the temporary branch created for this Release Candidate (`release-candidate/v1.0.9`).
+            - **To dismiss this Release Candidate:** Please close the issue. This will remove the temporary branch created for this Release Candidate (`${{ env.RELEASE_CANDIDATE_BRANCH }}`).
         with:
           script: |
             const { ISSUE_TITLE } = process.env
