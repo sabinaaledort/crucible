@@ -79,6 +79,7 @@ jobs:
 
       - name: Check the working tree for new changes
         run: |
+          git add "${ARTIFACTS_VERSION_FILE_PATH}"
           git diff --exit-code
           echo "::set-output name=exit_code::$?"
         id: check_diff_of_working_tree
@@ -90,7 +91,6 @@ jobs:
           git config user.name "${GIT_USER_NAME}"
           git config user.email "${GIT_USER_EMAIL}"
 
-          git add ${ARTIFACTS_VERSION_FILE_PATH}
           git commit -m "Bump version to ${RELEASE_CANDIDATE_TARGET_VERSION}"
 
           git push "${GIT_REMOTE}" "${RELEASE_CANDIDATE_BRANCH}"
@@ -162,4 +162,89 @@ jobs:
       - name: Save Issue Number
         run: echo "::set-output name=issue_number::${OPENED_ISSUE_NUMBER}"
         id: get_opened_issue
+
+  # generate-release-notes:
+  #   name: Generate Release Notes
+  #   runs-on: ubuntu-20.04
+  #   needs:
+  #     - create-release-candidate-branch
+
+  #   env:
+  #     RELEASE_CANDIDATE_BRANCH: ${{ needs.create-release-candidate-branch.outputs.created_release_candidate_branch }}
+  #     RELEASE_CANDIDATE_SOURCE_FULL_HASH: ${{ needs.create-release-candidate-branch.outputs.source_branch_full_hash }}
+  #     RELEASE_CANDIDATE_SOURCE_SHORT_HASH: ${{ needs.create-release-candidate-branch.outputs.source_branch_short_hash }}
+
+  #   outputs:
+  #     opened_issue_number: ${{ steps.get_opened_issue.outputs.issue_number }}
+
+  #   steps:
+  #     - name: Generate Release Notes
+  #       uses: actions/github-script@v5
+  #       with:
+  #         script: |
+  #           const result = await github.rest.repos.generateReleaseNotes({
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             tag_name: '${{ env.RELEASE_CANDIDATE_TARGET_VERSION }}',
+  #             target_commitish: '${{ env.RELEASE_CANDIDATE_SOURCE_BRANCH }}',
+  #           });
+  #           console.log(result)
+
+  #           core.exportVariable('RELEASE_NOTES', result.data.body);
+
+# 4. Submit a comment with instructions to the Issue
+
+      # - name: Create Issue for the Release Candidate
+      #   uses: actions/github-script@v5
+      #   env:
+      #     ISSUE_TITLE: >-
+      #       Release Candidate: ${{ env.RELEASE_CANDIDATE_TARGET_VERSION }}
+      #       from ${{ env.RELEASE_CANDIDATE_SOURCE_BRANCH }}@${{ env.RELEASE_CANDIDATE_SOURCE_SHORT_HASH }}
+      #     ISSUE_BODY: ${{ env.RELEASE_NOTES }}
+      #     ISSUE_COMMENT_BODY: >-
+      #       ## Release Candidate Details
+
+      #       **Commit SHA:** `${{ env.RELEASE_CANDIDATE_SOURCE_FULL_HASH }}`
+
+      #       **Temporary Branch:** `${{ env.RELEASE_CANDIDATE_BRANCH }}`
+
+      #       **Target Version:** `${{ env.RELEASE_CANDIDATE_TARGET_VERSION }}`
+
+      #       ## Available Actions
+
+      #       - **To modify the generated Release Notes:** Please edit the first comment posted in this issue thread.
+
+      #       - **To approve this Release Candidate:** Please add the `${{ env.ISSUE_LABELS_RELEASE_CANDIDATE_APPROVED }}`
+      #       label to this issue. Perform this step once the Release Candidate has been tested and verified.
+
+      #       - **To dismiss this Release Candidate:** Please close the issue. This will remove the temporary branch created for this Release Candidate (`release-candidate/v1.0.9`).
+      #   with:
+      #     script: |
+      #       const { ISSUE_TITLE } = process.env
+      #       const { ISSUE_BODY } = process.env
+
+      #       const result = await github.rest.issues.create({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         title: `${ISSUE_TITLE}`,
+      #         body: `${ISSUE_BODY}`,
+      #         labels: ['${{ env.ISSUE_LABELS_RELEASE_CANDIDATE }}'],
+      #       })
+      #       console.log(result)
+
+      #       const issue_number = result.data.number
+      #       core.exportVariable('OPENED_ISSUE_NUMBER', issue_number)
+
+      #       const { ISSUE_COMMENT_BODY } = process.env
+
+      #       github.rest.issues.createComment({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         issue_number: issue_number,
+      #         body: `${ISSUE_COMMENT_BODY}`,
+      #       })
+
+      # - name: Save Issue Number
+      #   run: echo "::set-output name=issue_number::${OPENED_ISSUE_NUMBER}"
+      #   id: get_opened_issue
 
