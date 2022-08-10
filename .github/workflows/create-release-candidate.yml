@@ -36,6 +36,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
       - name: Install Python dependencies
         run: pip3 install -r requirements.txt
         working-directory: .github/workflows/releases
@@ -48,6 +52,8 @@ jobs:
             --previous-version ${{ inputs.previous_version }} \
             --default-version ${{ env.DEFAULT_VERSION }} \
             --source-branch ${{ inputs.source_branch }})
+
+          echo ${VERSIONS}
 
           echo ::set-output name=target_version::$(echo ${VERSIONS} | jq .target_version)
           echo ::set-output name=previous_version::$(echo ${VERSIONS} | jq .previous_version)
