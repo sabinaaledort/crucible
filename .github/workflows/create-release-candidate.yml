@@ -77,3 +77,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         working-directory: .github/workflows/releases
         id: process_release_notes
+
+  create-release-candidate:
+    needs:
+      - process-inputs
+
+    uses: mkochanowski/crucible/.github/workflows/reusable/create-release-candidate.yml@main
+    with:
+      source_branch: ${{ inputs.source_branch }}
+      target_version: ${{ needs.process-inputs.outputs.target_version }}
+      release_notes: ${{ needs.process-inputs.outputs.release_notes }}
+    secrets: inherit
