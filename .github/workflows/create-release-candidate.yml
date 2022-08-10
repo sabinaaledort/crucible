@@ -63,3 +63,9 @@ jobs:
 
           ::set-output name=release_notes::${RELEASE_NOTES}
         id: process_release_notes
+
+      - name: Display debug data
+        run: |
+          echo ${TARGET_VERSION}
+          echo ${PREVIOUS_VERSION}
+          echo ${RELEASE_NOTES}
