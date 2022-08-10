@@ -55,8 +55,8 @@ jobs:
 
           echo ${VERSIONS}
 
-          echo ::set-output name=target_version::$(echo ${VERSIONS} | jq .target_version)
-          echo ::set-output name=previous_version::$(echo ${VERSIONS} | jq .previous_version)
+          echo ::set-output name=target_version::$(echo ${VERSIONS} | jq -r '.target_version')
+          echo ::set-output name=previous_version::$(echo ${VERSIONS} | jq -r '.previous_version')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         working-directory: .github/workflows/releases
