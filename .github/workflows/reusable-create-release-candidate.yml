@@ -70,9 +70,9 @@ jobs:
         # echo "::set-output name=branch_name::${RELEASE_CANDIDATE_BRANCH}"
         # id: create_release_candidate_branch
 
-      # TODO: Add Changelog to artifacts
+      # TODO: (Artifacts) Add Changelog
 
-      - name: (Update artifacts) Version file
+      - name: (Artifacts) Update Version file
         run: echo "${RELEASE_CANDIDATE_TARGET_VERSION}" > ${ARTIFACTS_VERSION_FILE_PATH}
 
       - name: Check the working tree for new changes
@@ -113,7 +113,7 @@ jobs:
           ISSUE_TITLE: >-
             Release Candidate: ${{ env.RELEASE_CANDIDATE_TARGET_VERSION }}
             from ${{ env.RELEASE_CANDIDATE_SOURCE_BRANCH }} @ ${{ env.RELEASE_CANDIDATE_SOURCE_SHORT_HASH }}
-          ISSUE_BODY: >
+          ISSUE_BODY: "
             ## Release Candidate Details
 
             Source SHA: ${{ env.RELEASE_CANDIDATE_SOURCE_FULL_HASH }}\n
