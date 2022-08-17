@@ -73,12 +73,12 @@ jobs:
       # TODO: (Artifacts) Add Changelog
 
       - name: (Artifacts) Update Version file
-        run: echo "${RELEASE_CANDIDATE_TARGET_VERSION}" > ${ARTIFACTS_VERSION_FILE_PATH}
+        run: |
+          echo "${RELEASE_CANDIDATE_TARGET_VERSION}" > ${ARTIFACTS_VERSION_FILE_PATH}
+          git add -v -f "${ARTIFACTS_VERSION_FILE_PATH}"
 
       - name: Check the working tree for new changes
         run: |
-          git check-ignore -v "${ARTIFACTS_VERSION_FILE_PATH}"
-          git add "${ARTIFACTS_VERSION_FILE_PATH}"
           git diff --exit-code
           echo "::set-output name=exit_code::$?"
         id: check_diff_of_working_tree
@@ -115,11 +115,11 @@ jobs:
             Release Candidate: ${{ env.RELEASE_CANDIDATE_TARGET_VERSION }}
             from ${{ env.RELEASE_CANDIDATE_SOURCE_BRANCH }} @ ${{ env.RELEASE_CANDIDATE_SOURCE_SHORT_HASH }}
           ISSUE_BODY: "
-            ## Release Candidate Details
+            ## Summary
 
+            Target version: `${{ env.RELEASE_CANDIDATE_TARGET_VERSION }}`\n
             Source Commit SHA: ${{ env.RELEASE_CANDIDATE_SOURCE_FULL_HASH }}\n
             Temporary branch with artifacts: `${{ env.RELEASE_CANDIDATE_BRANCH }}`\n
-            Target version: `${{ env.RELEASE_CANDIDATE_TARGET_VERSION }}`\n
 
             ## Available Actions
 
