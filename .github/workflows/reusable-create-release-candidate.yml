@@ -77,6 +77,7 @@ jobs:
 
       - name: Check the working tree for new changes
         run: |
+          git check-ignore -v "${ARTIFACTS_VERSION_FILE_PATH}"
           git add "${ARTIFACTS_VERSION_FILE_PATH}"
           git diff --exit-code
           echo "::set-output name=exit_code::$?"
@@ -116,8 +117,8 @@ jobs:
           ISSUE_BODY: "
             ## Release Candidate Details
 
-            Source SHA: ${{ env.RELEASE_CANDIDATE_SOURCE_FULL_HASH }}\n
-            Temporary branch with release artifacts: `${{ env.RELEASE_CANDIDATE_BRANCH }}`\n
+            Source Commit SHA: ${{ env.RELEASE_CANDIDATE_SOURCE_FULL_HASH }}\n
+            Temporary branch with artifacts: `${{ env.RELEASE_CANDIDATE_BRANCH }}`\n
             Target version: `${{ env.RELEASE_CANDIDATE_TARGET_VERSION }}`\n
 
             ## Available Actions
