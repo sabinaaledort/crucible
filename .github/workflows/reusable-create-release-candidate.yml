@@ -113,19 +113,20 @@ jobs:
           ISSUE_TITLE: >-
             Release Candidate: ${{ env.RELEASE_CANDIDATE_TARGET_VERSION }}
             from ${{ env.RELEASE_CANDIDATE_SOURCE_BRANCH }} @ ${{ env.RELEASE_CANDIDATE_SOURCE_SHORT_HASH }}
-          ISSUE_BODY: ${{ inputs.release_notes }}
-          ISSUE_COMMENT_BODY: "## Release Candidate Details
+          ISSUE_BODY: >
+            ## Release Candidate Details
 
-            Source Branch Commit SHA: ${{ env.RELEASE_CANDIDATE_SOURCE_FULL_HASH }}\n
-            Temporary Branch: `${{ env.RELEASE_CANDIDATE_BRANCH }}`\n
-            Target Version: `${{ env.RELEASE_CANDIDATE_TARGET_VERSION }}`\n
+            Source SHA: ${{ env.RELEASE_CANDIDATE_SOURCE_FULL_HASH }}\n
+            Temporary branch with release artifacts: `${{ env.RELEASE_CANDIDATE_BRANCH }}`\n
+            Target version: `${{ env.RELEASE_CANDIDATE_TARGET_VERSION }}`\n
 
             ## Available Actions
 
-            - **To modify the generated Release Notes:** Please edit the first comment posted in this issue thread.\n
-            - **To approve this Release Candidate:** Please add the `${{ env.ISSUE_LABELS_RELEASE_CANDIDATE_APPROVED }}`
-            label to this issue. Perform this step once the Release Candidate has been tested and verified.\n
+            - **To modify the generated Release Notes:** Please edit the comment below.\n
+            - **To approve this Release Candidate:** Please add a label `${{ env.ISSUE_LABELS_RELEASE_CANDIDATE_APPROVED }}`
+            to this issue. Approving a Release Candidate triggers a CI job that crafts a new Release and closes the relevant issue automatically. Perform this step once you have finished testing and verifying the Release Candidate.\n
             - **To dismiss this Release Candidate:** Please close the issue. This will remove the temporary branch created for this Release Candidate (`${{ env.RELEASE_CANDIDATE_BRANCH }}`).\n"
+          ISSUE_COMMENT_BODY: ${{ inputs.release_notes }}
         with:
           script: |
             const { ISSUE_TITLE } = process.env
