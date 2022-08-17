@@ -79,9 +79,9 @@ jobs:
 
       - name: Check the working tree for new changes
         run: |
-          git diff --exit-code
-          echo "::set-output name=exit_code::$?"
           git status
+          git diff --cached --exit-code
+          echo "::set-output name=exit_code::$?"
         id: check_diff_of_working_tree
         continue-on-error: true
 
