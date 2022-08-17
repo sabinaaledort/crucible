@@ -81,6 +81,7 @@ jobs:
         run: |
           git diff --exit-code
           echo "::set-output name=exit_code::$?"
+          git status
         id: check_diff_of_working_tree
         continue-on-error: true
 
