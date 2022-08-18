@@ -127,13 +127,9 @@ jobs:
       - uses: actions/checkout@v2
         with:
           ref: ${{ env.RELEASE_CANDIDATE_BRANCH }}
-        env:
-          RELEASE_CANDIDATE_BRANCH: "release-candidate/${{ steps.get_release_candidate_details.outputs.target_version }}"
 
       - name: Delete Release Candidate Branch
         run: git push "${GIT_REMOTE}" --delete "${RELEASE_CANDIDATE_BRANCH}"
-        env:
-          RELEASE_CANDIDATE_BRANCH: "release-candidate/${{ steps.get_release_candidate_details.outputs.target_version }}"
 
   # close-release-candidate:
   #   uses: mkochanowski/crucible/.github/workflows/releases/reusable/close-release-candidate.yml@main
