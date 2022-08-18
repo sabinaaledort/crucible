@@ -52,6 +52,12 @@ jobs:
       - name: Display Target Version
         run: echo ${{ steps.get_release_candidate_details.outputs.target_version }}
 
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ env.RELEASE_CANDIDATE_BRANCH }}
+        env:
+          RELEASE_CANDIDATE_BRANCH: ${{ steps.get_release_candidate_details.outputs.target_version }}
+
       - name: Delete Release Candidate Branch
         run: git push "${GIT_REMOTE}" --delete "${RELEASE_CANDIDATE_BRANCH}"
         env:
