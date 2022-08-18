@@ -1,0 +1,77 @@
+name: Process Release Candidate
+
+on:
+  issues:
+    types:
+      - closed
+      - labeled
+
+jobs:
+  # create-release:
+  #   name: Create Release on GitHub
+  #   runs-on: ubuntu-20.04
+
+  # close-release-candidate:
+  #   name: Close Release Candidate
+  #   runs-on: ubuntu-20.04
+  #
+  #   needs:
+  #     - create-release
+
+  remove-temporary-branch:
+    name: Remove temporary branch
+    runs-on: ubuntu-20.04
+
+    # env:
+    #   RELEASE_CANDIDATE_BRANCH: "release-candidate/${{ inputs.target_version }}"
+
+    steps:
+      # Get target version from issue title
+      # Title syntax: "Release Candidate: $VERSION from $BRANCH @ $SHA"
+      - name: Get Release Candidate details
+        # if: ${{ github.event.issue.user.login == 'github-actions' }}
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+        run: |
+          import os
+
+          issue_title = os.environ['ISSUE_TITLE']
+          issue_title_words = issue_title.split()
+
+          assert issue_title.startswith('Release Candidate')
+          assert len(issue_title_words) >= 2
+          target_version = issue_title_words[2]
+
+          print(f"::set-output name=target_version::{target_version}")
+        shell: python
+        id: get_release_candidate_details
+
+      - name: Display Target Version
+        run: echo ${{ steps.get_release_candidate_details.outputs.target_version }}
+
+      - name: Delete Release Candidate Branch
+        run: git push ${GIT_REMOTE} --delete ${RELEASE_CANDIDATE_BRANCH}
+        env:
+          RELEASE_CANDIDATE_BRANCH: ${{ steps.get_release_candidate_details.outputs.target_version }}
+
+      # - name: Close Release Candidate Issue
+      #   uses: actions/github-script@v5
+      #   env:
+      #     RELEASE_CANDIDATE_ISSUE_NUMBER: ${{ github.event.issue.number }}
+      #   with:
+      #     script: |
+      #       const { RELEASE_CANDIDATE_ISSUE_NUMBER } = process.env
+
+      #       github.rest.issues.update({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         issue_number: `${RELEASE_CANDIDATE_ISSUE_NUMBER}`,
+      #         state: 'closed',
+      #       })
+
+
+  # close-release-candidate:
+  #   uses: mkochanowski/crucible/.github/workflows/releases/reusable/close-release-candidate.yml@main
+  #   with:
+  #     issue_id: issue_id
+  #   secrets: inherit
