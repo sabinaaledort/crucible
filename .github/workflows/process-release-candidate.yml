@@ -42,31 +42,75 @@ jobs:
       - name: Display Target Version
         run: echo ${{ steps.get_release_candidate_details.outputs.target_version }}
 
-  # create-release:
-  #   name: Create Release on GitHub
-  #   runs-on: ubuntu-20.04
+  process-approval:
+    name: Process approval of Release Candidate
+    runs-on: ubuntu-20.04
+    if: ${{ github.event.action == 'labeled' && github.event.label.name == 'release-candidate/approved' && contains(github.event.issue.labels.*.name, 'release-candidate') }}
+    # if: ${{ github.event.action == 'labeled' && github.event.label.name == inputs.release_candidate_approved_label && contains(github.event.issue.labels.*.name, inputs.release_candidate_label) }}
 
-  # close-release-candidate:
-  #   name: Close Release Candidate
-  #   runs-on: ubuntu-20.04
-  #
-  #   needs:
-  #     - create-release
+    needs:
+      - process-inputs
 
-  # - name: Close Release Candidate Issue
-  #   uses: actions/github-script@v5
-  #   env:
-  #     RELEASE_CANDIDATE_ISSUE_NUMBER: ${{ github.event.issue.number }}
-  #   with:
-  #     script: |
-  #       const { RELEASE_CANDIDATE_ISSUE_NUMBER } = process.env
+    env:
+      RELEASE_CANDIDATE_ISSUE_NUMBER: ${{ github.event.issue.number }}
+      RELEASE_CANDIDATE_BRANCH: ${{ needs.process-inputs.outputs.release_candidate_branch }}
+      RELEASE_CANDIDATE_TARGET_VERSION: ${{ needs.process-inputs.outputs.target_version }}
 
-  #       github.rest.issues.update({
-  #         owner: context.repo.owner,
-  #         repo: context.repo.repo,
-  #         issue_number: `${RELEASE_CANDIDATE_ISSUE_NUMBER}`,
-  #         state: 'closed',
-  #       })
+    steps:
+      - name: Add Issue Comment
+        uses: actions/github-script@v5
+        env:
+          ISSUE_COMMENT_BODY: >-
+            This Release Candidate has been approved by @${{ github.event.sender.login }}.
+
+            This action triggered a workflow that will finalize the Release.
+            The progress of this task can be monitored here:
+            [#${{ github.run_id }}](/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+        with:
+          script: |
+            const { ISSUE_COMMENT_BODY } = process.env
+            const { RELEASE_CANDIDATE_ISSUE_NUMBER } = process.env
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: `${RELEASE_CANDIDATE_ISSUE_NUMBER}`,
+              body: `${ISSUE_COMMENT_BODY}`,
+            })
+
+      # TODO: Get the first comment in issue thread
+
+      - name: Create a new GitHub Release
+        uses: actions/github-script@v5
+        env:
+          RELEASE_BODY: ${{ github.event.issue.body }}
+        with:
+          script: |
+            const { RELEASE_BODY } = process.env
+            const { RELEASE_CANDIDATE_BRANCH } = process.env
+            const { RELEASE_CANDIDATE_TARGET_VERSION } = process.env
+
+            github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: `${RELEASE_CANDIDATE_TARGET_VERSION}`,
+              target_commitish: `${RELEASE_CANDIDATE_BRANCH}`,
+              name: `${RELEASE_CANDIDATE_TARGET_VERSION}`,
+              body: `${RELEASE_BODY}`,
+            })
+
+      - name: Close Release Candidate Issue
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { RELEASE_CANDIDATE_ISSUE_NUMBER } = process.env
+
+            github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: `${RELEASE_CANDIDATE_ISSUE_NUMBER}`,
+              state: 'closed',
+            })
 
   remove-temporary-branch:
     name: Remove temporary branch
