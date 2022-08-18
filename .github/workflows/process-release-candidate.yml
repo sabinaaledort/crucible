@@ -43,7 +43,7 @@ jobs:
         run: echo ${{ steps.get_release_candidate_details.outputs.target_version }}
 
   process-approval:
-    name: Process approval of Release Candidate
+    name: (if issue was labeled) Process approval
     runs-on: ubuntu-20.04
     if: ${{ github.event.action == 'labeled' && github.event.label.name == 'release-candidate/approved' && contains(github.event.issue.labels.*.name, 'release-candidate') }}
     # if: ${{ github.event.action == 'labeled' && github.event.label.name == inputs.release_candidate_approved_label && contains(github.event.issue.labels.*.name, inputs.release_candidate_label) }}
@@ -113,7 +113,7 @@ jobs:
             })
 
   remove-temporary-branch:
-    name: Remove temporary branch
+    name: (if issue was closed) Remove temporary branch
     runs-on: ubuntu-20.04
     if: ${{ github.event.action == 'closed' }}
 
