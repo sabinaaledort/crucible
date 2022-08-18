@@ -56,12 +56,12 @@ jobs:
         with:
           ref: ${{ env.RELEASE_CANDIDATE_BRANCH }}
         env:
-          RELEASE_CANDIDATE_BRANCH: ${{ steps.get_release_candidate_details.outputs.target_version }}
+          RELEASE_CANDIDATE_BRANCH: "release-candidate/${{ steps.get_release_candidate_details.outputs.target_version }}"
 
       - name: Delete Release Candidate Branch
         run: git push "${GIT_REMOTE}" --delete "${RELEASE_CANDIDATE_BRANCH}"
         env:
-          RELEASE_CANDIDATE_BRANCH: ${{ steps.get_release_candidate_details.outputs.target_version }}
+          RELEASE_CANDIDATE_BRANCH: "release-candidate/${{ steps.get_release_candidate_details.outputs.target_version }}"
 
       # - name: Close Release Candidate Issue
       #   uses: actions/github-script@v5
