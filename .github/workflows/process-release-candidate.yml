@@ -6,27 +6,17 @@ on:
       - closed
       - labeled
 
+env:
+  GIT_REMOTE: origin
+
 jobs:
-  # create-release:
-  #   name: Create Release on GitHub
-  #   runs-on: ubuntu-20.04
-
-  # close-release-candidate:
-  #   name: Close Release Candidate
-  #   runs-on: ubuntu-20.04
-  #
-  #   needs:
-  #     - create-release
-
-  remove-temporary-branch:
-    name: Remove temporary branch
+  process-inputs:
+    name: Process inputs
     runs-on: ubuntu-20.04
 
-    env:
-      GIT_REMOTE: origin
-
-    # env:
-    #   RELEASE_CANDIDATE_BRANCH: "release-candidate/${{ inputs.target_version }}"
+    outputs:
+      target_version: ${{ steps.get_release_candidate_details.outputs.target_version }}
+      release_candidate_branch: "release-candidate/${{ steps.get_release_candidate_details.outputs.target_version }}"
 
     steps:
       # Get target version from issue title
@@ -52,6 +42,44 @@ jobs:
       - name: Display Target Version
         run: echo ${{ steps.get_release_candidate_details.outputs.target_version }}
 
+  # create-release:
+  #   name: Create Release on GitHub
+  #   runs-on: ubuntu-20.04
+
+  # close-release-candidate:
+  #   name: Close Release Candidate
+  #   runs-on: ubuntu-20.04
+  #
+  #   needs:
+  #     - create-release
+
+  # - name: Close Release Candidate Issue
+  #   uses: actions/github-script@v5
+  #   env:
+  #     RELEASE_CANDIDATE_ISSUE_NUMBER: ${{ github.event.issue.number }}
+  #   with:
+  #     script: |
+  #       const { RELEASE_CANDIDATE_ISSUE_NUMBER } = process.env
+
+  #       github.rest.issues.update({
+  #         owner: context.repo.owner,
+  #         repo: context.repo.repo,
+  #         issue_number: `${RELEASE_CANDIDATE_ISSUE_NUMBER}`,
+  #         state: 'closed',
+  #       })
+
+  remove-temporary-branch:
+    name: Remove temporary branch
+    runs-on: ubuntu-20.04
+    if: ${{ github.event.action == 'closed' }}
+
+    needs:
+      - process-inputs
+
+    env:
+      RELEASE_CANDIDATE_BRANCH: ${{ needs.process-inputs.outputs.release_candidate_branch }}
+
+    steps:
       - uses: actions/checkout@v2
         with:
           ref: ${{ env.RELEASE_CANDIDATE_BRANCH }}
@@ -62,22 +90,6 @@ jobs:
         run: git push "${GIT_REMOTE}" --delete "${RELEASE_CANDIDATE_BRANCH}"
         env:
           RELEASE_CANDIDATE_BRANCH: "release-candidate/${{ steps.get_release_candidate_details.outputs.target_version }}"
-
-      # - name: Close Release Candidate Issue
-      #   uses: actions/github-script@v5
-      #   env:
-      #     RELEASE_CANDIDATE_ISSUE_NUMBER: ${{ github.event.issue.number }}
-      #   with:
-      #     script: |
-      #       const { RELEASE_CANDIDATE_ISSUE_NUMBER } = process.env
-
-      #       github.rest.issues.update({
-      #         owner: context.repo.owner,
-      #         repo: context.repo.repo,
-      #         issue_number: `${RELEASE_CANDIDATE_ISSUE_NUMBER}`,
-      #         state: 'closed',
-      #       })
-
 
   # close-release-candidate:
   #   uses: mkochanowski/crucible/.github/workflows/releases/reusable/close-release-candidate.yml@main
