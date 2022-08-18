@@ -75,7 +75,7 @@ jobs:
       - name: (Artifacts) Update Version file
         run: |
           echo "${RELEASE_CANDIDATE_TARGET_VERSION}" > ${ARTIFACTS_VERSION_FILE_PATH}
-          git add -v -f "${ARTIFACTS_VERSION_FILE_PATH}"
+          git add -f "${ARTIFACTS_VERSION_FILE_PATH}"
 
       - name: Check the working tree for new changes
         run: |
@@ -91,7 +91,7 @@ jobs:
           git config user.name "${GIT_USER_NAME}"
           git config user.email "${GIT_USER_EMAIL}"
 
-          git commit -m "Bump version to ${RELEASE_CANDIDATE_TARGET_VERSION}"
+          git commit -m "Add release artifacts for ${RELEASE_CANDIDATE_TARGET_VERSION}"
 
           git push "${GIT_REMOTE}" "${RELEASE_CANDIDATE_BRANCH}"
 
