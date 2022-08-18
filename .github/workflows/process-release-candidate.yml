@@ -22,6 +22,9 @@ jobs:
     name: Remove temporary branch
     runs-on: ubuntu-20.04
 
+    env:
+      GIT_REMOTE: origin
+
     # env:
     #   RELEASE_CANDIDATE_BRANCH: "release-candidate/${{ inputs.target_version }}"
 
@@ -50,7 +53,7 @@ jobs:
         run: echo ${{ steps.get_release_candidate_details.outputs.target_version }}
 
       - name: Delete Release Candidate Branch
-        run: git push ${GIT_REMOTE} --delete ${RELEASE_CANDIDATE_BRANCH}
+        run: git push "${GIT_REMOTE}" --delete "${RELEASE_CANDIDATE_BRANCH}"
         env:
           RELEASE_CANDIDATE_BRANCH: ${{ steps.get_release_candidate_details.outputs.target_version }}
 
