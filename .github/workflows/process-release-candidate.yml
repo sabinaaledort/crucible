@@ -51,9 +51,6 @@ jobs:
     needs:
       - process-inputs
 
-    outputs:
-      finished_processing: ${{ steps.get_release_processing_status.outputs.finished }}
-
     env:
       RELEASE_CANDIDATE_ISSUE_NUMBER: ${{ github.event.issue.number }}
       RELEASE_CANDIDATE_BRANCH: ${{ needs.process-inputs.outputs.release_candidate_branch }}
@@ -133,15 +130,10 @@ jobs:
               state: 'closed',
             })
 
-      - name: Get status of the Release Candidate publishing process
-        run: ::set-output name=finished::true
-        id: get_release_processing_status
-
-
   remove-temporary-branch:
     name: (if issue was closed) Ensure temporary branch is removed
     runs-on: ubuntu-20.04
-    if: ${{ github.event.action == 'closed' || needs.process-approval.outputs.finished_processing == 'true' }}
+    if: ${{ github.event.action == 'closed' || needs.process-approval.status == 'success' }}
 
     needs:
       - process-inputs
