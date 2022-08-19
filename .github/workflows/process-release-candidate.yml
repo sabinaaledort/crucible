@@ -95,7 +95,7 @@ jobs:
 
             console.log(result)
 
-            const release_notes = result.data.body
+            const release_notes = result.data[0].body
             core.exportVariable('RELEASE_NOTES', release_notes)
 
       - name: Create a new GitHub Release
