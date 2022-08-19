@@ -86,12 +86,12 @@ jobs:
           script: |
             const { RELEASE_CANDIDATE_ISSUE_NUMBER } = process.env
 
-            const result = await github.rest.issues.listComments(
+            const result = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: `${RELEASE_CANDIDATE_ISSUE_NUMBER}`,
               per_page: 10,
-            )
+            })
 
             const release_notes = result.data.body
             core.exportVariable('RELEASE_NOTES', release_notes)
