@@ -61,10 +61,12 @@ jobs:
         uses: actions/github-script@v5
         env:
           ISSUE_COMMENT_BODY: >-
-            This Release Candidate has been approved by @${{ github.event.sender.login }}.
+            @${{ github.event.sender.login }} approved this Release Candidate.
 
-            This action triggered a workflow that will finalize the Release.
-            The progress of this task can be monitored here:
+            No further action is required. A new Release will be created using the Release Notes
+            presented in this issue. All temporary artifacts will be removed automatically.
+
+            You can monitor the progress of this task here:
             [#${{ github.run_id }}](/${{ github.repository }}/actions/runs/${{ github.run_id }}).
         with:
           script: |
@@ -78,12 +80,26 @@ jobs:
               body: `${ISSUE_COMMENT_BODY}`,
             })
 
-      # TODO: Get the first comment in issue thread
+      - name: Get comment containing Release Notes
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { RELEASE_CANDIDATE_ISSUE_NUMBER } = process.env
+
+            const result = await github.rest.issues.listComments(
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: `${RELEASE_CANDIDATE_ISSUE_NUMBER}`,
+              per_page: 10,
+            )
+
+            const release_notes = result.data.body
+            core.exportVariable('RELEASE_NOTES', release_notes)
 
       - name: Create a new GitHub Release
         uses: actions/github-script@v5
         env:
-          RELEASE_BODY: ${{ github.event.issue.body }}
+          RELEASE_BODY: ${{ env.RELEASE_NOTES }}
         with:
           script: |
             const { RELEASE_BODY } = process.env
@@ -113,22 +129,28 @@ jobs:
             })
 
   remove-temporary-branch:
-    name: (if issue was closed) Remove temporary branch
+    name: (if issue was closed) Ensure temporary branch is removed
     runs-on: ubuntu-20.04
     if: ${{ github.event.action == 'closed' }}
 
     needs:
       - process-inputs
+      - process-approval
 
     env:
       RELEASE_CANDIDATE_BRANCH: ${{ needs.process-inputs.outputs.release_candidate_branch }}
 
     steps:
+      # - name: Check whether the temporary branch exists
+      #   run: git ...
+
       - uses: actions/checkout@v2
+        # if:
         with:
           ref: ${{ env.RELEASE_CANDIDATE_BRANCH }}
 
       - name: Delete Release Candidate Branch
+        # if:
         run: git push "${GIT_REMOTE}" --delete "${RELEASE_CANDIDATE_BRANCH}"
 
   # close-release-candidate:
