@@ -86,7 +86,6 @@ release_images:
     cpu_architecture: x86_64
     url: quay.io/openshift-release-dev/ocp-release:4.11.0-x86_64
     version: 4.11.0
-    default: true
 
 assisted_service_image_repo_url: quay.io/edge-infrastructure
 
