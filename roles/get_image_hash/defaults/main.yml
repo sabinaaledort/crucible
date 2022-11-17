@@ -50,6 +50,11 @@ os_images:
     url: https://mirror.openshift.com/pub/openshift-v4/aarch64/dependencies/rhcos/4.10/4.10.16/rhcos-4.10.16-aarch64-live.aarch64.iso
     rootfs_url: https://mirror.openshift.com/pub/openshift-v4/aarch64/dependencies/rhcos/4.10/4.10.16/rhcos-4.10.16-aarch64-live-rootfs.aarch64.img
     version: 410.84.202205191234-0
+  - openshift_version: '4.11'
+    cpu_architecture: x86_64
+    url: https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.11/4.11.0/rhcos-4.11.0-x86_64-live.x86_64.iso
+    rootfs_url: https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.11/4.11.0/rhcos-4.11.0-x86_64-live-rootfs.x86_64.img
+    version: 411.86.202208031059-0
 
 release_images:
   - openshift_version: '4.6'
@@ -77,6 +82,11 @@ release_images:
     cpu_architecture: arm64
     url: quay.io/openshift-release-dev/ocp-release:4.10.16-aarch64
     version: 4.10.16
+  - openshift_version: '4.11'
+    cpu_architecture: x86_64
+    url: quay.io/openshift-release-dev/ocp-release:4.11.0-x86_64
+    version: 4.11.0
+    default: true
 
 assisted_service_image_repo_url: quay.io/edge-infrastructure
 
@@ -93,4 +103,4 @@ assisted_installer_images:
     url: "{{ assisted_service_image_repo_url }}/assisted-installer-ui:{{ assisted_service_gui_tag }}"
   image_service:
     url: "{{ assisted_service_image_repo_url }}/assisted-image-service:{{ assisted_service_image_service_tag }}"
-  
+
