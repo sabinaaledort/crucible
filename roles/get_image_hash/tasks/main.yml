@@ -1,5 +1,7 @@
 - name: check skopeo is installed
   shell: /usr/bin/skopeo --version
+  args:
+    executable: /bin/bash
 
 - name: Filter images
   when: get_release_images | bool
